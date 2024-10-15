@@ -1,3 +1,12 @@
+## My own things
+secret/**
+prednasky/**
+creating/**
+
+## Jupyter things
+.ipynb**
+
+## Default .gitignore for TeX
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
