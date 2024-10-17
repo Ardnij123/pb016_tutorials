@@ -228,7 +228,7 @@
         \draw (hd.center) -- (d);
         \draw (g) -- (d);
     \end{tikzpicture}
-    \hfill
+    \hfill\pause
     \begin{tikzpicture}
         \node[or] (a) at (0, 0){a};
         \node[or] (b) at (0, -1){b};
@@ -325,8 +325,8 @@
 \frame{
     \frametitle{Příklad 3.1.4}
     Rozhodněte, zda je počáteční uzel, značené 1, splněn v následujícím
-    AND/OR grafu. Spočtěte také, kolik takových
-    stromů řešení existujei.
+    AND/OR grafu. Spočtěte také, kolik splňujících
+    stromů řešení existuje.
 
     \begin{center}
     \begin{tikzpicture}
@@ -354,6 +354,8 @@
     \end{center}
     \pause
 
+    Pouze 1 řešení $\{1, 2, 3, 4, 5, true\}$
+
     Proč není některé řešení zahrnující uzly 6, 7 splňující?
 }
 
@@ -367,7 +369,7 @@
     \begin{center}
     \begin{tikzpicture}[scale=2]
         \node (a) at (0, 0) {};
-        \tictactoe{a}{o;x;o;o;x;o;x;o;x}
+        \tictactoe{a}{x;;o;;x;;x;o;o}
     \end{tikzpicture}
     \end{center}
 }
@@ -384,7 +386,7 @@
         \tictactoe{b}{x;;o;o;x;;x;o;o}
         \draw[edge] (a) to (b);
 
-        \node[and] (c) at (0, -2) {};
+        \node[and, white] (c) at (0, -2) {};
         \tictactoe{c}{x;;o;;x;o;x;o;o}
         \draw[edge] (a) to (c);
 
@@ -400,7 +402,7 @@
         \tictactoe{f}{x;;o;o;x;x;x;o;o}
         \draw[edge] (b) to (f);
 
-        \node[or] (g) at (1, -4) {};
+        \node[or, white] (g) at (1, -4) {};
         \tictactoe{g}{x;o;o;x;x;;x;o;o}
         \draw[edge] (d) to (g);
 
@@ -408,15 +410,15 @@
         \tictactoe{h}{x;o;o;;x;x;x;o;o}
         \draw[edge] (d) to (h);
 
-        \node[and] (i) at (-3, -6) {};
+        \node[and, white] (i) at (-3, -6) {};
         \tictactoe{i}{x;x;o;o;x;o;x;o;o}
         \draw[edge] (e) to (i);
 
-        \node[or] (j) at (-1, -6) {};
+        \node[or, white] (j) at (-1, -6) {};
         \tictactoe{j}{x;o;o;o;x;x;x;o;o}
         \draw[edge] (f) to (j);
 
-        \node[or] (k) at (3, -6) {};
+        \node[or, white] (k) at (3, -6) {};
         \tictactoe{k}{x;o;o;o;x;x;x;o;o}
         \draw[edge] (h) to (k);
     \end{tikzpicture}
@@ -473,7 +475,9 @@
         \item někdy navíc účelová funkce $f:D_1\times \cdots \times D_n \to \RR$
             \vspace{1em}
         \item Řešením je $n$-tice $(x_1, \ldots, x_n)$, která splňuje všechna omezení
-        \item $(x_1, \ldots, x_n) \in \bigcap_i\in \{1, \ldots, m\}C_i$
+            \begin{itemize}
+                \item $(x_1, \ldots, x_n) \in \bigcap_{i\in \{1, \ldots, m\}}C_i$
+            \end{itemize}
             \vspace{1em}
         \item Pokud je řešení více, můžeme hledat takové, které maximalizuje (či minimalizuje) účelovou funkci
     \end{itemize}
