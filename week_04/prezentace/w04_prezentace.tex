@@ -1,0 +1,544 @@
+\documentclass{beamer}
+
+% chktex-file 1
+% chktex-file 8
+
+\usetheme[workplace=fi]{MU}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=czech,
+  english
+]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\newlength{\nodesize}
+\setlength{\nodesize}{1.5em}
+\tikzset{and/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{or/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+\tikzset{edge/.style = {->,> = latex'}}
+
+% Allows for split by delimiter
+% \getNth{string}{delimiter}{entry_no}
+% Source: https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string
+\ExplSyntaxOn
+\NewDocumentCommand{\getNth}{mmm}
+  {
+    % #1 string, #2 separator, #3 index
+    \seq_set_split:Nnx \l_tmpa_seq { #2 } { #1 }
+    \seq_item:Nn \l_tmpa_seq { #3 }
+  }
+\ExplSyntaxOff
+
+\newcommand{\tictactoe}[2]{%
+    \draw (#1.center) ++(-.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.5,-.5) -- +(1,0);
+    \draw (#1.center) ++(-.5,-.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.5) -- +(1,0);
+    \draw (#1.center) ++(-.3333,.3333) node {\getNth{#2}{;}{1}};
+    \draw (#1.center) ++(0,.3333) node {\getNth{#2}{;}{2}};
+    \draw (#1.center) ++(.3333,.3333) node {\getNth{#2}{;}{3}};
+    \draw (#1.center) ++(-.3333,0) node {\getNth{#2}{;}{4}};
+    \draw (#1.center) ++(0,0) node {\getNth{#2}{;}{5}};
+    \draw (#1.center) ++(.3333,0) node {\getNth{#2}{;}{6}};
+    \draw (#1.center) ++(-.3333,-.3333) node {\getNth{#2}{;}{7}};
+    \draw (#1.center) ++(0,-.3333) node {\getNth{#2}{;}{8}};
+    \draw (#1.center) ++(.3333,-.3333) node {\getNth{#2}{;}{9}};
+}
+
+\title{Dekompozice problému,\\problémy s omezujícími podmínkami}
+\author{Jindřich Matuška}
+\institute[FI MU]{Faculty of Informatics, Masaryk University}
+\date{17. října 2024}
+
+% 3 Dekompozice problému, Problémy s omezujícími podmínkami
+    % 3.1 Dekompozice, AND/OR grafy
+        % Definice/pojmy a značení AND/OR grafu
+        % Příklad AND/OR grafu
+            % Piškvorky (střídání 2 hráčů)
+            % Bludiště/Prohledávání (pouze OR uzly)
+        % Strom řešení
+            % Splněný vrchol ve stromu řešení
+        % Ukázat strom řešení na příkladu
+            % Piškvorky (střídání 2 hráčů)
+            % Bludiště/Prohledávání (pouze OR uzly)
+        % P3.1.2 Libovolný AND/OR <=> Bipartitní
+        % P3.1.4 Splnitelnost grafu
+            % Proč není graf s 6-7 stromem řešení?
+        % P3.1.6 AND/OR graf piškvorek
+
+    % Jupyter lab
+        % E1 Dragon problem
+        % E1.1 Vytvoření AND/OR grafu
+        % E1.2-3 Ohodnocení splnitelnosti
+        % E1.4 Výpis řešení
+
+    % 3.1 Problémy s omezujícími podmínkami
+        % Kecy o CSP
+        % Příklad Typová inference
+        % Definice Problému s omezujícími podmínkami
+        % Příklad sudoku
+            % TODO: udělat Clingo program
+        % P3.2.1 Stav grafů, popište řešení
+        % P3.2.3
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Obsah}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+    \frametitle{Čas na odpovědníky}
+}
+
+\begin{frame}
+    \frametitle{Obsah}
+    \tableofcontents
+\end{frame}
+
+\begin{section}{Dekompozice, AND/OR grafy}
+
+\frame{
+    \frametitle{AND/OR graf}
+    Syntax
+    \begin{itemize}
+        \item orientovaný graf
+        \item vnitřní vrcholy typu \textbf{AND} nebo \textbf{OR}
+            \begin{itemize}
+                \item značíme kolečkem (AND) či čtverečkem (OR)
+            \end{itemize}
+        \item koncové vrcholy s přiřazenou hodnotou
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Piškvorky}
+    \vspace{-2em}
+\begin{center}
+    \setlength{\nodesize}{4em}
+    \begin{tikzpicture}
+        \node[or] (a) at (0,0) {};
+        \tictactoe{a}{;;o;o;x;o;x;;x}
+
+        \node[and] (b) at (-4,-2) {};
+        \draw[edge] (a) to (b);
+        \tictactoe{b}{o;;o;o;x;o;x;;x}
+
+        \node[and] (c) at (0,-2) {};
+        \draw[edge] (a) to (c);
+        \tictactoe{c}{;o;o;o;x;o;x;;x}
+
+        \node[and] (d) at (4,-2) {};
+        \draw[edge] (a) to (d);
+        \tictactoe{d}{;;o;o;x;o;x;o;x}
+
+        \node[or] (e) at (-5,-4) {};
+        \draw[edge] (b) to (e);
+        \tictactoe{e}{o;x;o;o;x;o;x;;x}
+
+        \node[or] (f) at (-3,-4) {};
+        \draw[edge] (b) to (f);
+        \tictactoe{f}{o;;o;o;x;o;x;x;x}
+
+        \node[or] (g) at (-1,-4) {};
+        \draw[edge] (c) to (g);
+        \tictactoe{g}{x;o;o;o;x;o;x;;x}
+
+        \node[or] (h) at (1,-4) {};
+        \draw[edge] (c) to (h);
+        \tictactoe{h}{;o;o;o;x;o;x;x;x}
+
+        \node[or] (i) at (3,-4) {};
+        \draw[edge] (d) to (i);
+        \tictactoe{i}{x;;o;o;x;o;x;o;x}
+
+        \node[or] (j) at (5,-4) {};
+        \draw[edge] (d) to (j);
+        \tictactoe{j}{;x;o;o;x;o;x;o;x}
+
+        \node[and] (k) at (-5,-6) {};
+        \draw[edge] (e) to (k);
+        \tictactoe{k}{o;x;o;o;x;o;x;o;x}
+
+        \node[and] (l) at (5,-6) {};
+        \draw[edge] (j) to (l);
+        \tictactoe{l}{o;x;o;o;x;o;x;o;x}
+    \end{tikzpicture}
+\end{center}
+}
+
+\frame{
+    \frametitle{Bludiště (vyhledávací strom)}
+    \hfill
+    \begin{tikzpicture}
+        \node (a) at (0,4) {a};
+        \node (ab) at (0,1) {};
+        \node (e) at (0,0) {e};
+        \node (hjj) at (1,4) {};
+        \node (hhj) at (1,2) {};
+        \node (b) at (1,1) {b};
+        \node (c) at (1,0) {c};
+        \node (j) at (2,4) {j};
+        \node (hhi) at (2,3) {};
+        \node (h) at (2,2) {h};
+        \node (hii) at (3,4) {};
+        \node (hi) at (3,3) {};
+        \node (f) at (3,0) {f};
+        \draw (f) circle(.3);
+        \node (hiii) at (4,4) {};
+        \node (i) at (4,3) {i};
+        \draw (i) circle(.3);
+        \node (hd) at (4,2) {};
+        \node (d) at (4,1) {d};
+        \node (g) at (4,0) {g};
+        \draw (a) -- (ab.center);
+        \draw (ab.center) -- (b);
+        \draw (e) -- (c);
+        \draw (b) -- (c);
+        \draw (hhj.center) -- (hjj.center);
+        \draw (hjj.center) -- (j);
+        \draw (hhj.center) -- (h);
+        \draw (b) -- (d);
+        \draw (c) -- (f);
+        \draw (hhi.center) -- (h);
+        \draw (hd.center) -- (h);
+        \draw (hhi.center) -- (hi.center);
+        \draw (hi.center) -- (hii.center);
+        \draw (hiii.center) -- (hii.center);
+        \draw (hiii.center) -- (i);
+        \draw (hd.center) -- (d);
+        \draw (g) -- (d);
+    \end{tikzpicture}
+    \hfill
+    \begin{tikzpicture}
+        \node[or] (a) at (0, 0){a};
+        \node[or] (b) at (0, -1){b};
+        \draw[edge] (a) to (b);
+        \node[or] (c) at (-1.5,-2){c};
+        \draw[edge] (b) to (c);
+        \node[or] (d) at (1.5, -2){d};
+        \draw[edge] (b) to (d);
+        \node[or] (e) at (-2, -3){e};
+        \draw[edge] (c) to (e);
+        \node[and] (f) at (-1, -3){f};
+        \draw[edge] (c) to (f);
+        \node[or] (g) at (1, -3){g};
+        \draw[edge] (d) to (g);
+        \node[or] (h) at (2, -3){h};
+        \draw[edge] (d) to (h);
+        \node[and] (i) at (1.5, -4){i};
+        \draw[edge] (h) to (i);
+        \node[or] (j) at (2.5, -4){j};
+        \draw[edge] (h) to (j);
+    \end{tikzpicture}
+    \hfill\phantom{}
+}
+
+\frame{
+    \frametitle{Strom řešení, Splnitelnost}
+    Strom řešení $T$ problému $P$ s AND/OR grafem $G$
+    \begin{itemize}
+        \item podgraf grafu $T\subseteq G$, $T$ je strom
+        \item kořen $T$ je vrchol reprezentující $P$
+        \item pro uzel $T$ typu AND jsou všichni jeho následovníci z $G$ v $T$
+        \item pro uzel $T$ typu OR je právě jeden jeho následovník z $G$ v $T$
+    \end{itemize}
+    \vspace{1em}
+    Uzel je splněný tehdy, když pro něj existuje strom řešení se všemi koncovými vrcholy nastavenými na \textit{true}.
+}
+
+\frame{
+    \frametitle{Strom řešení, Splnitelnost}
+    Je uzel $1$ splnitelný? Kolik má stromů řešení, které jej splňují?
+    \begin{center}
+    \begin{tikzpicture}
+        \node[or] (1) at (0, 0) {1};
+        \node[and] (2) at (-1, -1) {2};
+        \node[or] (3) at (0, -1) {3};
+        \node (f1) at (1, -1) {false};
+        \node[and] (4) at (-1, -2) {4};
+        \node[and] (5) at (0, -2) {5};
+        \node[or] (6) at (1, -2) {6};
+        \node (t) at (0, -3) {true};
+        \node (f2) at (2, -3) {false};
+        \draw[edge] (1) to (2);
+        \draw[edge] (1) to (3);
+        \draw[edge] (1) to (f1);
+        \draw[edge] (2) to (4);
+        \draw[edge] (2) to (5);
+        \draw[edge] (3) to (5);
+        \draw[edge] (3) to (6);
+        \draw[edge] (4) to (t);
+        \draw[edge] (5) to (t);
+        \draw[edge] (6) to (t);
+        \draw[edge] (6) to (f2);
+    \end{tikzpicture}
+    \end{center}
+    \pause
+
+    Je splnitelný, splňují jej indukované grafy na vrcholech
+    \begin{equation*}
+        \{1, 2, 4, 5, true\}, \{1, 3, 5, true\}, \{1, 3, 6, true\}
+    \end{equation*}
+}
+
+\frame{
+    \frametitle{Příklad 3.1.2}
+    Ukažte, že každý AND/OR graf lze převést na ekvivalentní bipartitní
+    AND/OR graf, ve kterém jsou následníky vrcholů typu AND vždy vrcholy typu OR a opačně.
+    Jaké to má praktické důsledky pro implementaci AND/OR grafů?
+    \pause
+    \vspace{1em}
+
+    Pokud jsou v grafu nějaké uzly stejného typu spojené hranou,
+    pak je tento graf ekvivalentní s grafem, ve kterém jsou tyto uzly
+    nahrazeny jedním uzlem, který má výstupní hrany do všech uzlů,
+    které jsou sjednocením potomků těchto uzlů.
+    \vspace{1em}
+    \begin{equation*}
+        (P \wedge A) \wedge (B \iff P) \iff A\wedge B
+    \end{equation*}
+    \begin{equation*}
+        (P \vee A) \vee (B \iff P) \iff A\vee B
+    \end{equation*}
+}
+
+\frame{
+    \frametitle{Příklad 3.1.4}
+    Rozhodněte, zda je počáteční uzel, značené 1, splněn v následujícím
+    AND/OR grafu. Spočtěte také, kolik takových
+    stromů řešení existujei.
+
+    \begin{center}
+    \begin{tikzpicture}
+        \node[and] (1) at (0,0) {1};
+        \node[or] (2) at (0,-1) {2};
+        \draw[edge] (1) to (2);
+        \node[and] (3) at (1,-1) {3};
+        \draw[edge] (1) to (3);
+        \node[and] (4) at (0,-2) {4};
+        \draw[edge] (2) to (4);
+        \node[or] (5) at (1,-2) {5};
+        \draw[edge] (3) to (5);
+        \node[and] (6) at (-1,-2) {6};
+        \draw[edge] (2) to (6);
+        \node[and] (7) at (-2,-2) {7};
+        \draw[edge] (6) to[bend left] (7);
+        \draw[edge] (7) to[bend left] (6);
+        \node (t) at (0,-3) {true};
+        \draw[edge] (3) to (t);
+        \draw[edge] (4) to (t);
+        \draw[edge] (5) to (t);
+        \node (f) at (1,-3) {false};
+        \draw[edge] (5) to (f);
+    \end{tikzpicture}
+    \end{center}
+    \pause
+
+    Proč není některé řešení zahrnující uzly 6, 7 splňující?
+}
+
+\frame{
+    \frametitle{Příklad 3.1.6}
+    Uvažte rozehranou partii piškvorek zobrazenou na
+    obrázku, v níž je právě na tahu hráč kreslící kolečka. Sestrojte AND/OR
+    graf pro tuto partii. Nalezněte stromy řešení tohoto AND/OR grafu a
+    interpretujte jejich vztah k výsledku partie.
+
+    \begin{center}
+    \begin{tikzpicture}[scale=2]
+        \node (a) at (0, 0) {};
+        \tictactoe{a}{o;x;o;o;x;o;x;o;x}
+    \end{tikzpicture}
+    \end{center}
+}
+
+\frame{
+    \frametitle{Příklad 3.1.6}
+    \begin{center}
+        \setlength{\nodesize}{4em}
+    \begin{tikzpicture}
+        \node[or] (a) at (0, 0) {};
+        \tictactoe{a}{x;;o;;x;;x;o;o}
+
+        \node[and] (b) at (-2, -2) {};
+        \tictactoe{b}{x;;o;o;x;;x;o;o}
+        \draw[edge] (a) to (b);
+
+        \node[and] (c) at (0, -2) {};
+        \tictactoe{c}{x;;o;;x;o;x;o;o}
+        \draw[edge] (a) to (c);
+
+        \node[and] (d) at (2, -2) {};
+        \tictactoe{d}{x;o;o;;x;;x;o;o}
+        \draw[edge] (a) to (d);
+
+        \node[or] (e) at (-3, -4) {};
+        \tictactoe{e}{x;x;o;o;x;;x;o;o}
+        \draw[edge] (b) to (e);
+
+        \node[or] (f) at (-1, -4) {};
+        \tictactoe{f}{x;;o;o;x;x;x;o;o}
+        \draw[edge] (b) to (f);
+
+        \node[or] (g) at (1, -4) {};
+        \tictactoe{g}{x;o;o;x;x;;x;o;o}
+        \draw[edge] (d) to (g);
+
+        \node[or] (h) at (3, -4) {};
+        \tictactoe{h}{x;o;o;;x;x;x;o;o}
+        \draw[edge] (d) to (h);
+
+        \node[and] (i) at (-3, -6) {};
+        \tictactoe{i}{x;x;o;o;x;o;x;o;o}
+        \draw[edge] (e) to (i);
+
+        \node[or] (j) at (-1, -6) {};
+        \tictactoe{j}{x;o;o;o;x;x;x;o;o}
+        \draw[edge] (f) to (j);
+
+        \node[or] (k) at (3, -6) {};
+        \tictactoe{k}{x;o;o;o;x;x;x;o;o}
+        \draw[edge] (h) to (k);
+    \end{tikzpicture}
+    \end{center}
+}
+
+\end{section}
+
+\begin{section}{Jupyter lab 1}
+\frame{
+    \frametitle{Jupyter lab 1 - Dragon problem}
+    \begin{itemize}
+        \item Reprezentace problému jako AND/OR graf
+        \item Sémantika AND a OR uzlů
+        \item Výpis plánu řešení
+    \end{itemize}
+    }
+\end{section}
+
+\begin{section}{Problémy s omezujícími podmínkami}
+
+\frame{
+    \frametitle{Problémy s omezujícími podmínkami}
+    \begin{itemize}
+        \item CSP --- Constraint satisfaction problem
+        \item Deklarativní programování
+        \item Definujeme očekávané vlastnosti řešení
+        \vspace{1em}
+        \item Obarvení grafu
+        \item Algebrogram
+        \item Problém N dam
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Odvození typů}
+    U následujícího programu poveďte typovou inferenci (tj.\ odvození typů) funkcí
+    funkcí f a g. Neuvažujte přetížení, funkce budou mít vždy jeden typ.
+
+    \vspace{1em}
+    \texttt{%
+        x = f(g(0))\\
+        x = f(x)\\
+        x = g(x)\\
+    }
+}
+
+\frame{
+    \frametitle{Problém s omezujícími podmínkami}
+    \begin{itemize}
+        \item soubor proměnných $X_1, \ldots, X_n$ s neprázdnými doménami $D_1, \ldots, D_n$
+        \item soubor omezení $C_1, \ldots, C_m$;
+            každé omezení je podmnožinou $D_1\times \cdots \times D_n$
+        \item někdy navíc účelová funkce $f:D_1\times \cdots \times D_n \to \RR$
+            \vspace{1em}
+        \item Řešením je $n$-tice $(x_1, \ldots, x_n)$, která splňuje všechna omezení
+        \item $(x_1, \ldots, x_n) \in \bigcap_i\in \{1, \ldots, m\}C_i$
+            \vspace{1em}
+        \item Pokud je řešení více, můžeme hledat takové, které maximalizuje (či minimalizuje) účelovou funkci
+    \end{itemize}
+}
+
+% TODO: sem vložit kód sudoku
+
+\frame{
+    \frametitle{Graf stavů}
+    \begin{itemize}
+        \item Stromová struktura
+        \item Každý uzel přiřazuje hodnotu jedné proměnné
+        \item List (Koncový uzel) pokud již nelze rozšířit bez porušení pravidel
+        \item Cílová podmínka --- přiřazení je úplné
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 3.2.1}
+    Sestavte graf stavů pro následující CSP.\@ Proměnné přiřazujte v sekvenčním
+    pořadí podle jejich deklarace. Popište řešení.
+
+    \vspace{1em}
+    \texttt{%
+        A in 2..4\\
+        B in 2..3\\
+        C in 0..6\\
+        \vspace{1em}
+        A - B >= C\\
+        A * (B-1) != B + C\\  % chktex 26
+        A != B  % chktex 26
+    }
+}
+
+\frame{
+    \frametitle{Příklad 3.2.3}
+    Jako kouzelný čtverec označíme čtvercovou matici, kde součet čísel na
+    každém řádku a v každém sloupci je stejný. Jednotlivé buňky mohou nabývat celočíselných
+    hodnot mezi 1 a $n^2$, kde $n$ je dimenze uvažované matice.
+
+    Jedním z netriviálních řešení pro $n = 3$ je kouzelný čtverec níže.
+    
+    Formulujte tento problém jako CSP pro uvedené $n = 3$. Kromě omezení
+    nezapomeňte uvést význam zavedených proměnných a jejich domény.
+    
+    \begin{center}
+        \begin{tikzpicture}[scale=1.5]
+        \node (a) at (0, 0) {};
+        \tictactoe{a}{2;9;4;7;5;3;6;1;8}
+    \end{tikzpicture}
+    \end{center}
+}
+
+\end{section}
+
+\begin{section}{Jupyter lab 2}
+\frame{
+    \frametitle{Jupyter lab 2 --- Constraint satisfaction problems}
+
+    \begin{itemize}
+        \item Seznámení s knihovnou \texttt{constraint}
+        \item Map coloring problem
+        \item Problém 8 dam
+    \end{itemize}
+}
+\end{section}
+
+\end{document}
