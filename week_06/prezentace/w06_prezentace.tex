@@ -1,0 +1,338 @@
+\documentclass{beamer}
+
+% chktex-file 1
+% chktex-file 8
+
+\usetheme[workplace=fi]{MU}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=czech,
+  english
+]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, shapes.geometric}
+
+\newlength{\nodesize}
+\setlength{\nodesize}{1.5em}
+\tikzset{and/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{or/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+
+\tikzset{min/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{max/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+\tikzset{rand/.style = {diamond,draw,minimum size=\nodesize}}
+
+\tikzset{edge/.style = {->,> = latex'}}
+
+% Allows for split by delimiter
+% \getNth{string}{delimiter}{entry_no}
+% Source: https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string
+\ExplSyntaxOn
+\NewDocumentCommand{\getNth}{mmm}
+  {
+    % #1 string, #2 separator, #3 index
+    \seq_set_split:Nnx \l_tmpa_seq { #2 } { #1 }
+    \seq_item:Nn \l_tmpa_seq { #3 }
+  }
+\ExplSyntaxOff
+
+\setbeamertemplate{enumerate item}{\alph{enumi})}  % chktex 9 chktex 10
+
+\newcommand{\tictactoe}[2]{%
+    \draw (#1.center) ++(-.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.5,-.5) -- +(1,0);
+    \draw (#1.center) ++(-.5,-.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.5) -- +(1,0);
+    \draw (#1.center) ++(-.3333,.3333) node {\getNth{#2}{;}{1}};
+    \draw (#1.center) ++(0,.3333) node {\getNth{#2}{;}{2}};
+    \draw (#1.center) ++(.3333,.3333) node {\getNth{#2}{;}{3}};
+    \draw (#1.center) ++(-.3333,0) node {\getNth{#2}{;}{4}};
+    \draw (#1.center) ++(0,0) node {\getNth{#2}{;}{5}};
+    \draw (#1.center) ++(.3333,0) node {\getNth{#2}{;}{6}};
+    \draw (#1.center) ++(-.3333,-.3333) node {\getNth{#2}{;}{7}};
+    \draw (#1.center) ++(0,-.3333) node {\getNth{#2}{;}{8}};
+    \draw (#1.center) ++(.3333,-.3333) node {\getNth{#2}{;}{9}};
+}
+
+\title{Výroková logika}
+\author{Jindřich Matuška}
+\institute[FI MU]{Faculty of Informatics, Masaryk University}
+\date{24. října 2024}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Obsah}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+    \frametitle{Čas na odpovědníky}
+}
+
+\begin{frame}
+    \frametitle{Obsah}
+    \tableofcontents
+\end{frame}
+
+\begin{section}{Syntax}
+
+\frame{
+    \frametitle{Syntax výrokové logiky}
+    \begin{itemize}
+        \item Abeceda
+            \begin{itemize}
+                \item Výrokové proměnné $\mathcal{P} = \{p, q, r, \ldots\}$
+                \item Logické spojky $\neg, \vee, \wedge, \implies, \iff, \ldots$
+                \item Pomocné symboly závorek $(, )$
+            \end{itemize}
+        \item Formule výrokové logiky
+            \begin{itemize}
+                \item Každá proměnná $p\in \mathcal{P}$ je formule
+                \item Jsou-li $p, q$ formule, pak jsou formule i
+                    $\neg (p), (p)\vee(q), (p)\wedge(q), (p)\implies(q), (p)\iff(q), \ldots$
+                \item Množinu formulí výrokové logiky značíme $\mathcal{F}$
+            \end{itemize}
+    \end{itemize}
+}
+
+\end{section}
+
+\begin{section}{Sémantika}
+
+\frame{
+    \frametitle{Sémantika výrokové logiky}
+
+    \begin{itemize}
+        \item Interpretace $I$
+            \begin{itemize}
+                \item Zobrazení $I: \mathcal P\to \{0,1\}$
+                \item Přiřazuje výrokovým proměnným 1 (pravda) či 0 (nepravda)
+            \end{itemize}
+        \item Valuace příslušící $I$
+            \begin{itemize}
+                \item Zobrazení $I: \mathcal F\to \{0,1\}$
+                \item Rozšíření interpretace na všechny výrokové proměnné podle sémantiky spojek
+            \end{itemize}
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Pojmy}
+
+    \begin{itemize}
+        \item Formule $\varphi$ pravdivá v interpretaci $I$ --- $I(\varphi) = 1$
+        \item Formule $\varphi$ logicky pravdivá (tautologie) --- $\forall I.\ I(\varphi) = 1$
+        \item Kontradikce --- $\forall I.\ I(\varphi) = 0$
+        \item Splnitelná --- $\exists I.\ I(\varphi) = 1$
+        \item Sémanticky ekvivalentní formule $\varphi, \psi$ --- $\forall I.\ I(\varphi) = I(\psi)$
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Pravdivostní tabulka}
+
+    \begin{center}
+    \begin{tabular}{cc | ccccc}  % chktex 44
+        $p$ & $q$ & $p$ & $\wedge$ & $(q$ & $\implies$ & $\neg p)$ \\ \midrule
+        $0$ & $0$ & $0$ & $0$ & $0$ & $1$ & $1$\\
+        $0$ & $1$ & $0$ & $0$ & $1$ & $1$ & $1$\\
+        $1$ & $0$ & $1$ & $1$ & $0$ & $1$ & $0$\\
+        $1$ & $1$ & $1$ & $0$ & $1$ & $0$ & $0$
+    \end{tabular}
+    \end{center}
+}
+
+\frame{
+	\frametitle{Příklad 5.2.4.}
+    Mějme formuli výrokové logiky $\varphi \equiv (p\wedge q) \iff (\neg q \wedge r)$.
+    Bez použití pravdivostní tabulky určete:
+    \begin{itemize}
+        \item zda je $\varphi$ pravdivá v interpretaci $I(p) = 0, I(q) = I(r) = 1$,
+        \item zda je $\varphi$ kontradikcí,
+        \item zda je $\varphi$ tautologií,
+        \item zda je $\varphi$ splnitelná; případně nalezněte nějaký její model.
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 5.2.5.}
+    Udejte příklad formule $\varphi$ takové, že:
+    \begin{itemize}
+        \item $\varphi$ obsahuje právě 3 různé výrokové proměnné a je pravdivá právě ve 3 interpretacích,
+        \item $\varphi$ obsahuje právě 3 různé výrokové proměnné, je pravdivá právě ve 3 interpretacích a obsahuje pouze logickou spojku $\implies$,
+        \item $\varphi$ je kontradikce, obsahuje právě 2 různé výrokové proměnné, každou dvakrát
+    \end{itemize}
+    (Uvažujte interpretaci jako zobrazení přiřazující hodnoty právě výrokovým proměnným vyskytujícím se v $\varphi$.)
+}
+
+\end{section}
+
+\begin{section}{Normální formy}
+
+\frame{
+    \frametitle{Normální formy}
+
+    \begin{itemize}
+        \item Literál je výroková proměnná nebo její negace
+        \item Klauzule je disjunkce literálů ($\vee$)
+        \item Duální klauzule je konjunkce literálů ($\wedge$)
+    \end{itemize}
+    \vspace{1em}
+    \begin{itemize}
+        \item Konjunktivní normální forma (KNF) --- konjunkce klauzulí
+        \item Disjunktivní normální forma (DNF) --- disjunkce duálních klauzulí
+        \item Úplná normální forma (ÚKNF, ÚDNF) --- každá klauzule obsahuje každou výrokovou proměnnou právě jednou
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 5.3.2, 5.3.3}
+
+    Použitím ekvivalentních úprav nalezněte KNF následující formule.
+    \begin{itemize}
+        \item $\varphi \equiv (p\implies q)\implies r$
+    \end{itemize}
+
+    Použitím ekvivalentních úprav nalezněte DNF následující formule.
+    \begin{itemize}
+        \item $\varphi \equiv (p\iff q)\implies (r\vee s)$
+    \end{itemize}
+}
+
+\end{section}
+
+\begin{section}{Množiny formulí, splnitelnost, vyplývání}
+
+\frame{
+    \frametitle{Splnitelnost množiny formulí}
+
+    Množina formulí $\mathcal T$ je splnitelná,
+    jestliže existuje interpretace $I$,
+    v níž jsou pravdivé všechny formule $\varphi\in\mathcal T$.
+    O množině $\mathcal T$ řekneme, že je pravdivá v interpretaci $I$
+    a tuto interpretaci nazveme modelem množiny $\mathcal T$.
+    \vspace{1em}
+
+    Formule $\varphi$ logicky vyplývá z množiny formulí $\mathcal T$
+    ($\mathcal T \models \varphi$),
+    právě když je $\varphi$ pravdivá v každém modelu množiny $\mathcal T$.
+}
+
+\frame{
+    \frametitle{Příklad 5.4.1, 5.4.2}
+
+    Určete splnitelnost následujících množin formulí. Je-li množina splnitelná,
+    nalezněte nějaký její model. Vyhněte se použití pravdivostních tabulek.
+
+    \begin{itemize}
+        \item $\mathcal T = \{(p\implies q)\wedge r, q\wedge r, r\implies s, p\wedge \neg s\}$
+    \end{itemize}
+    \vspace{1em}
+
+    Je množina formulí $\mathcal T = \emptyset$ splnitelná? Dokažte.
+}
+
+\frame{
+    \frametitle{Příklad 5.4.7}
+
+    Uvažujte množinu formulí výrokové logiky $\mathcal T$ a formule $\varphi, \psi$.
+    Rozhodněte o platnosti následujících tvzení:
+
+    \begin{itemize}
+        \item Pokud $\mathcal T \models \varphi$ a $\mathcal T\models \psi$,
+            pak $\mathcal T \models \varphi \vee \psi$
+        \item Pokud $\mathcal T \models \varphi$ a $\mathcal T\models \psi$,
+            pak $\mathcal T \models \varphi \wedge \psi$
+        \item Pokud $\mathcal T \models \varphi\vee \psi$,
+            pak $\mathcal T \models \varphi$ nebo $\mathcal T \models \psi$
+        \item Pokud $\mathcal T \models \varphi\wedge \psi$,
+            pak $\mathcal T \models \varphi$ a $\mathcal T \models \psi$
+        \item Pokud $\mathcal T \models \varphi$,
+            pak $\mathcal T \models \varphi \vee \psi$
+        \item Pokud $\mathcal T \models \varphi$,
+            pak $\mathcal T \models \varphi \wedge \psi$
+        \item Pokud $\mathcal T \models \varphi$,
+            pak $\mathcal T \cup \{\psi\} \models \varphi$
+        \item Pokud $\mathcal T \cup \{\psi\} \models \varphi$,
+            pak $\mathcal T \models \varphi$
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 5.4.8}
+
+    Ukažte, že logické vyplývání $\mathcal T \models \varphi$ platí,
+    právě když množina $\mathcal T \cup \{\neg \varphi\}$ je nesplnitelná.
+}
+
+\end{section}
+
+\begin{section}{Logické spojky}
+
+\frame{
+    \frametitle{Sémantika logické spojky}
+
+    Sémantika $n$-ární logické spojky $\square$ je funkce $f_\square: {\{0, 1\}}^n\to \{0,1\}$
+
+    \vspace{1em}
+    Valuace formule $\psi\equiv \square(\varphi_1, \ldots, \varphi_n)$ v interpretaci $I$
+    je dána:
+    \begin{equation*}
+        I(\psi) = f_{\square}(I(\varphi_1), \ldots, I(\varphi_n))
+    \end{equation*}
+    \vspace{1em}
+
+    Sémantika logické spojky lze definovat např.\ pomocí tabulky
+    nebo již definovaných spojek
+}
+
+\frame{
+    \frametitle{Úplný systém logických spojek}
+
+    Množina logických spojek tvoří úplný systém logických spojek,
+    pokud lze formulemi obsahujícími pouze spojky z dané množiny
+    vyjádřit libovolnou logickou funkci.
+
+    \vspace{1em}
+    Například množina $\{\wedge, \vee, \neg, \implies, \iff\}$
+    je úplný systém logických spojek.
+}
+
+\frame{
+    \frametitle{Příklad 5.5.1}
+
+    Kolik existuje různých vzájemně neekvivalentních $n$-árních spojek?
+}
+
+\frame{
+    \frametitle{Příklad 5.5.5 a)}  % chktex 9
+
+    Ukažte, že $\{NOR\}$ je úplný systém logických spojek.
+    Vyjděte z předpoklad, že $\{\implies, \neg\}$ je úplný systém logických spojek.\\
+    (Tj.\ vyjádřete formule $\varphi \implies \psi$ a $\neg \varphi$
+    pomocí formulí obsahujících pouze spojku $NOR$).
+    \begin{equation*}
+        \varphi NOR \psi \equiv \neg(\varphi \vee \psi)
+    \end{equation*}
+}  % chktex 10
+
+\end{section}
+
+\end{document}  % chktex 17
