@@ -1,0 +1,347 @@
+\documentclass{beamer}
+
+% chktex-file 1
+% chktex-file 8
+
+\usetheme[workplace=fi]{MU}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=czech,
+  english
+]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{multicol}
+
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, shapes.geometric}
+
+\newlength{\nodesize}
+\setlength{\nodesize}{1.5em}
+\tikzset{and/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{or/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+
+\tikzset{min/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{max/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+\tikzset{rand/.style = {diamond,draw,minimum size=\nodesize}}
+
+\tikzset{edge/.style = {->,> = latex'}}
+
+% Allows for split by delimiter
+% \getNth{string}{delimiter}{entry_no}
+% Source: https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string
+\ExplSyntaxOn
+\NewDocumentCommand{\getNth}{mmm}
+  {
+    % #1 string, #2 separator, #3 index
+    \seq_set_split:Nnx \l_tmpa_seq { #2 } { #1 }
+    \seq_item:Nn \l_tmpa_seq { #3 }
+  }
+\ExplSyntaxOff
+
+\setbeamertemplate{enumerate item}{\alph{enumi})}  % chktex 9 chktex 10
+
+\newcommand{\tictactoe}[2]{%
+    \draw (#1.center) ++(-.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.5,-.5) -- +(1,0);
+    \draw (#1.center) ++(-.5,-.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.5) -- +(1,0);
+    \draw (#1.center) ++(-.3333,.3333) node {\getNth{#2}{;}{1}};
+    \draw (#1.center) ++(0,.3333) node {\getNth{#2}{;}{2}};
+    \draw (#1.center) ++(.3333,.3333) node {\getNth{#2}{;}{3}};
+    \draw (#1.center) ++(-.3333,0) node {\getNth{#2}{;}{4}};
+    \draw (#1.center) ++(0,0) node {\getNth{#2}{;}{5}};
+    \draw (#1.center) ++(.3333,0) node {\getNth{#2}{;}{6}};
+    \draw (#1.center) ++(-.3333,-.3333) node {\getNth{#2}{;}{7}};
+    \draw (#1.center) ++(0,-.3333) node {\getNth{#2}{;}{8}};
+    \draw (#1.center) ++(.3333,-.3333) node {\getNth{#2}{;}{9}};
+}
+
+\title{Predikátová logika}
+\author{Jindřich Matuška}
+\institute[FI MU]{Faculty of Informatics, Masaryk University}
+\date{24. října 2024}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Obsah}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+    \frametitle{Čas na odpovědníky}
+}
+
+\begin{frame}
+    \frametitle{Obsah}
+    \tableofcontents
+\end{frame}
+
+\begin{section}{Syntax}
+
+\frame{
+    \frametitle{Syntax \only<1>{výrokové}\only<2->{predikátové} logiky}
+    \begin{itemize}
+        \item Abeceda
+            \begin{itemize}
+                    \only<1>{{\color{red}
+                \item Výrokové proměnné $\mathcal{P} = \{p, q, r, \ldots\}$
+                    }}
+                    \only<2->{{\color<2>{red}
+                \item Symboly pro proměnné $\mathcal{V} = \{x, y, z, \ldots\}$
+                \item Funkční symboly $f, g, h, \ldots$
+                \item Predikátové symboly $P, Q, R, \ldots$
+                }}
+                \item Logické spojky $\neg, \vee, \wedge, \implies, \iff, \ldots$
+                \item Pomocné symboly závorek $(, )$ \only<2->{{\color<2>{red} a kvantifikátorů $\forall, \exists$}}
+            \end{itemize}
+        \item<3-> Term
+            \begin{itemize}
+                \item Něco co můžeme vložit do predikátu
+                \item Symboly pro proměnné $\mathcal V$
+                \item Pro každý $n$-ární funkční symbol $f$ a termy $t_1, \ldots, t_n$,\\ $f(t_1, \ldots, t_n)$ je term
+            \end{itemize}
+        \item<3-> Jazyk predikátové logiky $\mathcal L$
+            \begin{itemize}
+                \item Množina funkčních a predikátových symbolů
+            \end{itemize}
+    \end{itemize}
+}
+
+\frame{
+    \begin{itemize}
+        \item Formule predikátové logiky
+            \begin{itemize}
+                \item Pro každý $n$-ární predikátový symbol a termy $t_1, \ldots, t_n$,\\
+                    $P(t_1, \ldots, t_n)$ je (atomická) formule
+                \item Jsou-li $\varphi, \psi$ formule, pak jsou formule i
+                    $\neg (\varphi), (\varphi)\vee(\psi), (\varphi)\wedge(\psi), (\varphi)\implies(\psi), (\varphi)\iff(\psi), \ldots$
+                \item Jsou-li $t_1$ a $t_2$ temy, pak $t_1 = t_2$ je formule
+                \item Je-li $\varphi$ formule a $x$ proměnná, pak $\exists x (\varphi)$ a $\forall x (\varphi)$ jsou formule
+                \item Množinu formulí výrokové logiky značíme $\mathcal{F}$
+            \end{itemize}
+    \end{itemize}
+}
+
+\frame{
+	\frametitle{Výskyt proměnné}
+
+	Výskyt proměnné $x$ ve formuli $\varphi$ je
+		\begin{itemize}
+		    \item \textit{vázaný}, existuje-li podformule $\varphi$, ozn. $\psi$, která obsahuje tento výskyt a začíná $\exists x$ nebo $\forall x$
+            \item \textit{volný} v opačném případě
+        \end{itemize}
+	\vspace{1em}
+
+    Formule, která nemá žádný volný výskyt proměnné se nazývá \textit{uzavřená} nebo též \textit{sentence}
+}
+
+\frame{
+    \frametitle{Příklad 6.1.1}
+	Ve formuli
+		\[\varphi\equiv 2\ |\ x \Rightarrow \exists y(y\cdot 2 = x \vee \sin(x+y) > 1)\]
+	kde všechny symboly mají obvyklý (matematický) význam,
+    identifikujte (vč.\ arity, pokud to dává smysl) všechny
+	\begin{itemize}
+		\item[a)] proměnné (vč.\ jejich výskytů),  % chktex 9 chktex 10
+		\item[b)] funkční a predikátové symboly.  % chktex 9 chktex 10
+		\item[c)] termy,  % chktex 9 chktex 10
+		\item[d)] logické spojky,  % chktex 9 chktex 10
+		\item[e)] atomické formule,  % chktex 9 chktex 10
+	\end{itemize}\medskip
+
+	U funkčních a predikátových symbolů určete i jejich aritu.
+}  % chktex 10
+
+\frame{
+    \frametitle{Příklad 6.1.2}
+	Uvažujte jazyk $\mathcal L$ predikátové logiky obsahující  funkční a predikátové symboly zadané následující tabulkou:
+    \begin{center}\begin{tabular}{l | l | l }  % chktex 44
+    symbol & typ & arita \\\midrule
+    $f $ & funkční & 3 \\
+    $d $ & funkční & 0 \\
+    $P $ & predikátový & 1 \\
+    $Q $ & predikátový & 2 \\
+    \end{tabular}\end{center}
+    Rozhodněte, která z následujících slov jsou \textbf{termy} a \textbf{formule} jazyka $\mathcal L$:
+
+    \noindent\begin{minipage}{0.35\linewidth}
+\begin{itemize}
+    \item[a)] $Q(d,d)$,  % chktex 9
+    \item[b)] $z$,  % chktex 9 chktex 10
+    \item[c)] $f(f(d))$,  % chktex 9 chktex 10
+    \item[d)] $f(d,f(d,d,d),d)$,  % chktex 9 chktex 10
+        \vspace{1em}\phantom{}
+\end{itemize}
+    \end{minipage}
+    \begin{minipage}{0.6\linewidth}
+\begin{itemize}
+    \item[e)] $y=x$,  % chktex 9 chktex 10
+    \item[f)] $\forall x (Q(d,d)=x)$,  % chktex 9 chktex 10
+    \item[g)] $\forall y (f(f(x,y,z),d,d))$,  % chktex 9 chktex 10
+    \item[h)] $\forall x (Q(f(f(d,d,d),y,z),f(z,d,y))\vee P(f(d,z,x)))$.  % chktex 9 chktex 10
+\end{itemize}
+    \end{minipage}
+}  % chktex 10
+
+\end{section}
+
+\begin{section}{Sémantika}
+
+\frame{
+    \frametitle{Sémantika predikátové logiky}
+
+    \begin{itemize}
+        \item Interpretace $I$
+            \begin{itemize}
+                \item neprázdné univerzum (doména) $\mathcal D_{I}$
+                \item $n$-ární relace $I(P) \subseteq \mathcal{D}_I^n$ pro každý $n$-ární predikátový symbol $P$
+                \item Zobrazení $I(f): \mathcal{D}_I^n\to \mathcal{D}_I$ pro každý $n$-ární funkční symbol $f$
+            \end{itemize}
+        \item Valuace příslušící $I$
+            \begin{itemize}
+                \item Zobrazení $V: \mathcal V\to \mathcal D_I$
+                \item Přiřazuje proměnným prvky univerza
+            \end{itemize}
+        \item Hodnota termu $t$ v interpretaci $I$ a valuaci $V$
+            \begin{itemize}
+                \item Prvek $|t|_{I, V}\in \mathcal D_I$
+                \item $|t|_{I, V} = V(x)$ pro pokud je $t$ proměnná
+                \item $|t|_{I, V} = I(f)(|t_1|_{I, V}, \ldots, |t_n|_{I, V})$ pokud $t=f(t_1, \ldots, t_n)$
+            \end{itemize}
+    \end{itemize}
+
+    \[\forall x ((P(x, y) \vee P(f(x), g(x, y)))\implies Q(x, x, y))\]
+}
+
+\frame{
+    \frametitle{Sémantika predikátové logiky 2}
+
+    Formule $\varphi$ je pravdivá v interpretaci $I$ a valuaci $V$, značeno $\models_I^V \varphi$, právě když platí jedna z možností
+    \begin{itemize}
+        \item $\varphi \equiv P(t_1, \ldots, t_n)$ a $(|t_1|_{I, V}, \ldots, |t_n|_{I, V})\in I(P)$
+        \item $\varphi \equiv t_1 = t_2$ a $|t_1|_{I, V} = |t_2|_{I, V}$
+        \item \ldots Logické operátory \ldots
+        \item $\varphi \equiv \forall x(\psi)$ a pro všechny prvky univerza $d\in\mathcal D$ platí $\models_I^{V'}\psi$, kde $V'$ vznikla z $V$ nahrazením obrazu $x$ prvkem $d$
+        \item $\varphi \equiv \exists x(\psi)$ a existuje prvek univerza $d\in\mathcal D$, pro který platí $\models_I^{V'}\psi$, kde $V'$ vznikla z $V$ nahrazením obrazu $x$ prvkem $d$
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Pojmy}
+
+    \begin{itemize}
+        \item Formule $\varphi$ pravdivá v interpretaci $I$, značíme $\models_I \varphi$,
+            jestliže je pravdivá v interpretaci $I$ pro libovolnou valuaci $V$.
+        \item Formule $\varphi$ logicky pravdivá (tautologie), značíme $\models \varphi$,
+            jestliže je pravdivá v každé interpretaci.
+            % Ukázat, co všechno můžeme měnit pro pravdivou a logicky pravdivou
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 6.2.1}
+    Ukažte, že existenční kvantifikátor $\exists$ lze v predikátové logice zavést jako syntaktickou zkratku, tj.\ ekvivalentními úpravami vyjádřete  $\exists x \varphi$ bez použití symbolu $\exists$.
+    % Přes množinu?
+}
+
+\frame{
+    \frametitle{Příklad 6.2.2 b)}  % chktex 9
+
+    Nalezněte negace následujících formulí tak, aby se symboly $\neg$ nacházely
+    výhradně bezprostředně před predikátovými symboly.
+    \[\exists x((P(x) \wedge Q(x))\vee R(x))\]
+}  % chktex 10
+
+\frame{
+    % Zde ukázat přístup "forall=oponent, exists=já"
+    \frametitle{Příklad 6.2.3}
+    Uvažte formuli $\varphi\equiv \forall x (P(x)\Rightarrow\exists y \neg Z(x,y))$. Pro každou z následujících interpretací rozhodněte, zda je v ní formule $\varphi$ pravdivá.
+    \begin{itemize}
+        \item[a)] $\mathcal D_{I} = \{ 0 \}$, $I(P)=\varnothing$, $I(Z)=\varnothing$  % chktex 9 chktex 10
+        \item[b)] $\mathcal D_{I} = \mathbb Z$, $I(P)=\{1, 2, 3, \dots\}$, $I(Z)=\mathbb Z^2$  % chktex 9 chktex 10
+        \item[c)] $\mathcal D_{I} = \mathbb Z$, $I(P)=\{1, 2, 3, \dots\}$, $I(Z)=\leq $  % chktex 9 chktex 10
+        \item[d)] $\mathcal D_{I} = \{ 0 \}$, $I(P)=\{0 \}$, $I(Z)=\text{id}$\footnote{Relace identity obsahuje dvojice identických prvků, $\text{id}:=\{(x,y)\in \mathcal D_I^2; x=y\}$.}  % chktex 9 chktex 10
+    \end{itemize}
+}  % chktex 9 chktex 10
+
+\frame{
+    \frametitle{Příklad 6.2.7}
+    Rozhodněte, v jakých interpretacích jsou pravdivé následující formule:
+\begin{itemize}
+    \item[a)] $ \forall x \exists y \exists z (((x=y) \vee (x=z)) \wedge (y \not = z)) $  % chktex 9 chktex 10
+    \item[b)] $ \forall x \forall y \forall z ((Q(x,y)\land Q(y,z))\Rightarrow Q(x,z))$  % chktex 9 chktex 10
+    \item[c)] $ \forall x (\neg Q(x,x)\land \exists y Q(x, y))$  % chktex 9 chktex 10
+    \item[d)] $ \forall x (x\neq f(x)\land x=f(f(x)))$  % chktex 9 chktex 10
+\end{itemize}}  % chktex 9 chktex 10
+
+\frame{
+    \frametitle{Příklad 6.2.8}
+    Uvažujte jazyk $\mathcal L$ predikátové logiky obsahující binární funkční symbol  $+$ a unární predikátový symbol $K$.
+    Uvažujte interpretaci (realizaci) $I$ jazyka $\mathcal L$, kde univerzum tvoří všechna celá čísla $\mathbb Z$, $+$ se realizuje jako sčítání a $K(x)$ jako \uv{$x$ je kladné}. Nalezněte
+    \begin{enumerate}[topsep=1pt,itemsep=-1pt,partopsep=1ex]
+        \item[a)] fomuli $\alpha(x)$, která je pravdivá v $I$ právě v těch valuacích $V$, že $V(x)=0$,  % chktex 9
+        \item[b)] fomuli $\beta(x,y)$, která je pravdivá v $I$ právě v těch valuacích $V$, že $V(x)<V(y)$,  % chktex 9 chktex 10
+        \item[c)] fomuli $\gamma(x,y)$, která je pravdivá v $I$ právě v těch valuacích $V$, že $V(x)=-V(y)$,  % chktex 9 chktex 10
+        \item[d)] fomuli $\delta(x)$, která je pravdivá v $I$ právě v těch valuacích $V$, že $V(x)=1$.  % chktex 9 chktex 10
+    \end{enumerate}
+    Při definování formulí se můžete odvolat na formule, které jste již zavedli v předchozích bodech.
+}  % chktex 10
+
+\end{section}
+
+\begin{section}{Normální formy}
+
+\frame{
+    \frametitle{Prenexová normální forma}
+    Uzavřená formule $\varphi$ se nachází v \textit{prenexové normální formě (PNF)}, je-li tvaru
+    \[Q_1 x_1\dots Q_n x_n \psi,\]
+    kde $Q_i\in\{\forall,\exists\}$, $x_1,\dots,x_n$ jsou proměnné
+    a formule $\psi$ je v konjunktivní normální formě
+    (zejména tedy neobsahuje žádný kvantifikátor).
+    \vspace{1em}
+
+    Uzavřená formule $\varphi$ se nachází ve \textit{Skolemově normální formě}, nachází-li se v prenexové normální formě a obsahuje pouze obecné kvantifikátory $\forall$.
+}
+
+\frame{
+    \frametitle{Algoritmus převodu do PNF (a Skolemovy NF)}
+
+\begin{itemize}
+    \item[I.] Eliminujeme zbytečné kvantifikátory.
+    \item[II.] Přejmenujeme proměnné tak, aby u každého kvantifikátoru byla jiná proměnná.
+    \item[III.] Eliminujeme jiné spojky než $\vee$, $\land$, $\neg$.
+    \item[IV.] Přesuneme negaci až před samotné predikáty.
+    \item[V.] Kvantifikátory přesuneme ven z jádra formule.
+    \item[VI.] Jádro formule upravíme do KNF pomocí distributivních zákonů.
+	\item[VII.] (Odstraníme existenční kvantifikátory zakódováním do předchozích všeobecně kvantifikovaných proměnných.)
+\end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 6.3.1 a)}  % chktex 9 chktex 10
+
+    Převeďte následující formule do prenexové normální formy a proveďte
+    skolemizaci.
+
+    \[(\forall x \exists y Q(x,y) \vee \exists x \forall y P(x,y)) \wedge \neg \exists x \exists y \forall z R(x,y,z)\]
+}  % chktex 9 chktex 10
+
+\end{section}
+
+\end{document}  % chktex 17
