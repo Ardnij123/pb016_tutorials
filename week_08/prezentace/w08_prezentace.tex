@@ -1,0 +1,329 @@
+\documentclass{beamer}
+
+% chktex-file 1
+% chktex-file 8
+% chktex-file 9
+% chktex-file 10
+
+\usetheme[workplace=fi]{MU}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=czech,
+  english
+]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{multicol}
+
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, shapes.geometric}
+
+\newlength{\nodesize}
+\setlength{\nodesize}{1.5em}
+\tikzset{and/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{or/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+
+\tikzset{min/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{max/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+\tikzset{rand/.style = {diamond,draw,minimum size=\nodesize}}
+
+\tikzset{edge/.style = {->,> = latex'}}
+
+% Allows for split by delimiter
+% \getNth{string}{delimiter}{entry_no}
+% Source: https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string
+\ExplSyntaxOn
+\NewDocumentCommand{\getNth}{mmm}
+  {
+    % #1 string, #2 separator, #3 index
+    \seq_set_split:Nnx \l_tmpa_seq { #2 } { #1 }
+    \seq_item:Nn \l_tmpa_seq { #3 }
+  }
+\ExplSyntaxOff
+
+\setbeamertemplate{enumerate item}{\alph{enumi})}  % chktex 9 chktex 10
+
+\newcommand{\tictactoe}[2]{%
+    \draw (#1.center) ++(-.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.5,-.5) -- +(1,0);
+    \draw (#1.center) ++(-.5,-.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.5) -- +(1,0);
+    \draw (#1.center) ++(-.3333,.3333) node {\getNth{#2}{;}{1}};
+    \draw (#1.center) ++(0,.3333) node {\getNth{#2}{;}{2}};
+    \draw (#1.center) ++(.3333,.3333) node {\getNth{#2}{;}{3}};
+    \draw (#1.center) ++(-.3333,0) node {\getNth{#2}{;}{4}};
+    \draw (#1.center) ++(0,0) node {\getNth{#2}{;}{5}};
+    \draw (#1.center) ++(.3333,0) node {\getNth{#2}{;}{6}};
+    \draw (#1.center) ++(-.3333,-.3333) node {\getNth{#2}{;}{7}};
+    \draw (#1.center) ++(0,-.3333) node {\getNth{#2}{;}{8}};
+    \draw (#1.center) ++(.3333,-.3333) node {\getNth{#2}{;}{9}};
+}
+
+\title{Důkazové systémy a rezoluce}
+\author{Jindřich Matuška}
+\institute[FI MU]{Faculty of Informatics, Masaryk University}
+\date{14.\ listopadu 2024}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Obsah}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+    \frametitle{Čas na odpovědníky}
+}
+
+\begin{frame}
+    \frametitle{Obsah}
+    \tableofcontents
+\end{frame}
+
+\begin{section}{Obecná rezoluce ve výrokové logice}
+
+\frame{
+    \frametitle{S čím pracujeme}
+    Pracujeme s klauzulemi
+    \begin{itemize}
+        \item Množiny literálů $\{l_1, \ldots, l_n\}$
+            \begin{itemize}
+                \item Ekvivalentní zápis $\bigvee_{i\in\{1,\ldots, n\}} l_i$
+            \end{itemize}
+        \item Každý literál je výroková proměnná ($p$) nebo její negace ($\neg p$)
+        \item Speciálně symbol $\square$ je prázdná klauzule (kontradikce)
+        \item Množinu klauzulí chápeme jako jejich konjunkci
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Rezoluční pravidlo}
+    Uvažujme klauzule $C_1 = \{p, l_1, \ldots, l_n\}$ a $C_2 = \{\neg p, {l'}_1, \ldots, {l'}_m\}$,
+    kde $l_i$, ${l'}_j$ jsou literály.
+    Jejich rezolventou je klauzule $C = \{l_1, \ldots, l_n, {l'}_1, \ldots, {l'}_m\}$.
+    \vspace{1em}
+
+    Rezolventa dvou klauzulí zachovává pravdivost v interpretaci.
+    \[I(C_1) = 1 \wedge I(C_2)=1 \implies I(C) = 1\]
+    Obrácená implikace nutně neplatí.
+    \vspace{1em}
+
+    \pause
+    Proč? (Příklad 7.1.4)
+}
+
+\frame{
+    \frametitle{Rezoluční důkaz $C$ z množiny klauzulí $S$}
+    Konečná posloupnost klauzulí $C_1, \ldots, C_n$, kde $C_n = C$ a pro každé $C_i$:
+    \begin{itemize}
+        \item $C_i \in S$ nebo
+        \item $C_i$ vzniklo aplikací rezolučního pravidla na předcházející klauzule
+    \end{itemize}
+
+    Pokud existuje takový rezoluční důkaz, řekneme že $C$ je rezolučně
+    dokazatelná z $S$, zapisujeme $S \vdash_R C$.
+
+    Pokud existuje důkaz $S \vdash_R \square$, nazveme tento důkaz vyvrácením $S$.
+
+    Rezoluční důkazy zapisujeme často pomocí stromu.
+    \vspace{2em}
+
+    Důkaz klauzule $C=\{\neg q\}$ z množiny $S = \{\{p, r\}, \{\neg s, \neg r\}, \{\neg q, s\}, \{\neg p\}\}$
+}
+
+\frame{
+    \frametitle{Příklad 7.1.1}
+
+Obecnou rezolucí ukažte, že
+\begin{itemize}
+    \item[a)] formule $( p \vee q) \wedge (\neg{q} \vee \neg{r}) \wedge (\neg{p} \vee s) \wedge (\neg{s}) \wedge (r \vee s)$ je nesplnitelná,
+    \item[b)] platí logické vyplývání $\{(\neg s\land t)\Rightarrow r, \neg s, \neg s \Rightarrow t\}\vDash r$.
+\end{itemize}
+}
+
+\frame{
+    \frametitle{Rezoluční vyvrácení}
+
+    Pro množinu formulí $\mathcal T$ a formuli $\varphi$ platí $\mathcal T \models \varphi$,
+    právě když $\mathcal T\cup \{\neg \varphi\}$ je nesplnitelná.
+}
+
+\end{section}
+
+\begin{section}{SLD rezoluce ve výrokové logice}
+
+\frame{
+    \frametitle{SLD rezoluce}
+    Lineární rezoluce na uspořádaných klauzulích s výběrovým pravidlem.
+    \vspace{1em}
+
+    Rezoluční strom SLD rezoluce je ve tvaru jedné větve.
+
+    SLD strom zachycuje všechna možná vyhodnocení.
+    \vspace{1em}
+
+    Výběové pravidlo určuje na kterém literálu rezolvujeme.
+    \begin{itemize}
+        \item V tomto předmětu \textbf{vždy první literál} v klauzuli.
+    \end{itemize}
+    \vspace{1em}
+
+    SLD rezoluce je úplná pro Hornovy klauzule
+    \begin{itemize}
+        \item každá klauzule má nejvýše 1 pozitivní literál
+        \item \textit{fakta} --- pouze pozitivní literál, $[p]$
+        \item \textit{pravidla} --- pozitivní literál a alespoň jeden negativní, $[p, \neg q, \neg r]$
+        \item \textit{cíle} --- pouze negativní literály, $[\neg q, \neg r]$
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad}
+
+    Pomocí SLD rezoluce vyvraťte množinu
+    \[\{ [\neg s, \neg u], [q, \neg r], [q, \neg t], [q], [r], [u, \neg q], [s]\}\]
+    Nakreslete SLD strom systematického hledání řešení.
+    Nakreslete rezoluční strom pro nej\-le\-věj\-ší úspěšnou větev SLD stromu.
+}
+
+\frame{
+    \frametitle{Příklad 7.2.1}
+
+    
+Vysvětlete intuitivní význam jednotlivých typů Hornových klauzulí, tedy \textit{faktů}, \textit{pravidel} a \textit{cílů}.
+}
+
+\frame{
+    \frametitle{Příklad 7.2.2}
+
+SLD rezolucí ukažte nesplnitelnost množiny uspořádaných klauzulí $\{[q,\neg s,\neg r], [p,\neg q], [s], [r]\} \cup \{[\neg p,\neg s]\}$.
+}
+
+\end{section}
+
+\begin{section}{Obecná rezoluce v predikátové logice}
+
+    \frame{
+        \frametitle{Obecná rezoluce v predikátové logice}
+
+        Na formulích ve skolemově normální formě.
+
+        Klauzule opět zapisujeme jako množiny literálů.
+
+        Při rezoluci používáme substituci (nahrazení) za termy
+        \begin{itemize}
+            \item Nahradit můžeme obecnější term za specifičtější
+            \item Proměnnou za libovolný term
+        \end{itemize}
+        \vspace{1em}
+
+        Substituce
+        \begin{itemize}
+            \item Množina $\{x_1/t_1, \ldots, x_n/t_n\}$
+            \item $x_i$ jsou proměnné, $t_i$ jsou termy
+            \item Přejmenování proměnných, pokud všechny $t_i$ jsou proměnné
+            \item Unifikátor $S$, pokud $|S\Phi| = 1$
+        \end{itemize}
+
+        \[S_1 = \{P(x, y), \neg Q(y, f(x))\}, S_2 = \{P(f(x)), P(y), P(f(f(c)))\}\]
+        \[\Phi_1 = \{x/c, y/b\}, \Phi_2 = \{x/f(c), y/f(f(c))\}\]
+    }
+
+    \frame{
+        \frametitle{Rezoluční pravidlo pro predikátovou logiku}
+
+        Pro dvě klauzule \textbf{bez společných proměnných}
+        \[\{P(\vec{t_1}), \ldots, P(\vec{t_k}), L_1, \ldots, L_n\} \text{ a }
+        \{\neg P(\vec{t'_1}), \ldots, \neg P(\vec{t'_l}), L'_1, \ldots, L'_m\}\]
+        a substituci $\Phi$, která je unifikátorem množiny
+        \[\{P(\vec{t_1}), \ldots P(\vec{t_k}), P(\vec{t'_1}), \ldots P(\vec{t'_l})\}\]
+        je jejich rezolventou
+        \[\{L_1, \ldots, L_n, L'_1, \ldots, L'_m\}\Phi\]
+    }
+
+    \frame{
+        \frametitle{Příklad 7.3.1}
+        Nalezněte $S\Phi$ pro zadaná $S$ a $\Phi$.
+        \begin{itemize}
+            \item[a)] $S=\{P(x), Q(y)\}$, $\Phi=\{x/y, y/x\}$
+            \item[b)] $S=\{P(c, x), \neg P(x, f(z)) \}$, $\Phi=\{f(z)/x, x/d\}$
+            \item[c)] $S=\{P(x, y), P(c, z), P(c, c)\}$, $\Phi=\{x/y, y/z, z/c\}$
+        \end{itemize}
+    }
+
+    \frame{
+        \frametitle{Příklad 7.3.2}
+        Nalezněte (nejobecnější) unifikátory následujících množin literálů ($a,b,c,d$ jsou konstanty).
+        \begin{itemize}
+            \item[a)] $S=\{P(x), P(y)\}$
+            \item[b)] $S=\{P(x), Q(y)\}$
+            \item[c)] $S=\{Q(x,x), Q(y,c)\}$
+            \item[d)] $S=\{ Q(h(x,y), w), Q(h(g(v),a), f(v)), Q(h(g(v),a), f(b)) \} $
+        \end{itemize}
+    }
+
+    \frame{
+        \frametitle{Příklad 7.3.5}
+
+        Uvažujte následující tvrzení:
+        \begin{itemize}
+            \item \uv{Existuje drak.}
+            \item \uv{Draci spí nebo loví.}
+            \item \uv{Když mají draci hlad, nespí.}
+        \end{itemize}
+        Rezolucí dokažte, že z uvedených tvrzení plyne \uv{Když má drak hlad, loví,} a to dvěma způsoby: (1) přímým odvozením závěru a (2) vyvrácením množiny obsahující předpoklady a negaci závěru. Zejména v řešení
+        \begin{itemize}
+            \item[a)] formalizujte uvedená tvrzení (předpoklady a závěr) v jazyce predikátové logiky,
+            \item[b)] určete význam (interpretaci) jednotlivých predikátů,
+            \item[c)] proveďte skolemizaci tvrzení a zapište je v klauzulárním tvaru a
+            \item[d)] nakonec proveďte samotnou rezoluci.
+        \end{itemize}
+    }
+\end{section}
+
+\begin{section}{Dopředné a zpětné řetězení}
+
+    \frame{
+        \frametitle{Dopředné a zpětné řetězení}
+        
+        Báze znalostí --- Hornovy klauzule bez omezení
+        \begin{itemize}
+            \item Lze zapsat jako množina implikací a faktů
+        \end{itemize}
+
+        Dopředné řetězení --- začínáme u faktů, pomocí implikací odvozujeme další fakty
+
+        Zpětné řetězení --- začínáme u dotazu, koukáme na možná pravidla odvození
+    }
+
+    \frame{
+        \frametitle{Příklad 7.4.1}
+
+        Proveďte algoritmus dopředného řetězení pro dotaz $E$, je-li zadána následující báze znalostí:\smallskip
+        \begin{itemize}
+            \item $(B\land D)\Rightarrow E$
+            \item $A\Rightarrow B$
+            \item $(A\land F)\Rightarrow D$
+            \item $F\Rightarrow A$
+            \item $C\Rightarrow B$
+            \item $F$
+        \end{itemize}
+    }
+
+\end{section}
+
+\end{document}  % chktex 17
