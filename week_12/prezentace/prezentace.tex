@@ -1,0 +1,427 @@
+\documentclass{beamer}
+
+% chktex-file 1
+% chktex-file 8
+% chktex-file 9
+% chktex-file 10
+
+\usetheme[workplace=fi]{MU}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=czech,
+  english
+]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{listings}
+
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, shapes.geometric}
+\usetikzlibrary{calc, positioning}
+\usetikzlibrary{decorations.pathmorphing, decorations.pathreplacing, decorations.shapes}
+\usepackage{pgfplots}
+
+\newlength{\nodesize}
+\setlength{\nodesize}{1.5em}
+\tikzset{and/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{or/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+
+\tikzset{min/.style = {shape=circle,draw,minimum size=\nodesize}}
+\tikzset{max/.style = {shape=rectangle,draw,minimum size=\nodesize}}
+\tikzset{rand/.style = {diamond,draw,minimum size=\nodesize}}
+
+\tikzset{edge/.style = {->,> = latex'}}
+
+% Allows for split by delimiter
+% \getNth{string}{delimiter}{entry_no}
+% Source: https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string
+\ExplSyntaxOn
+\NewDocumentCommand{\getNth}{mmm}
+  {
+    % #1 string, #2 separator, #3 index
+    \seq_set_split:Nnx \l_tmpa_seq { #2 } { #1 }
+    \seq_item:Nn \l_tmpa_seq { #3 }
+  }
+\ExplSyntaxOff
+
+\setbeamertemplate{enumerate item}{\alph{enumi})}  % chktex 9 chktex 10
+
+\newcommand{\tictactoe}[2]{%
+    \draw (#1.center) ++(-.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.1667,-.5) -- +(0,1);
+    \draw (#1.center) ++(.5,-.5) -- +(0,1);
+    \draw (#1.center) ++(-.5,-.5) -- +(1,0);
+    \draw (#1.center) ++(-.5,-.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.1667) -- +(1,0);
+    \draw (#1.center) ++(-.5,.5) -- +(1,0);
+    \draw (#1.center) ++(-.3333,.3333) node {\getNth{#2}{;}{1}};
+    \draw (#1.center) ++(0,.3333) node {\getNth{#2}{;}{2}};
+    \draw (#1.center) ++(.3333,.3333) node {\getNth{#2}{;}{3}};
+    \draw (#1.center) ++(-.3333,0) node {\getNth{#2}{;}{4}};
+    \draw (#1.center) ++(0,0) node {\getNth{#2}{;}{5}};
+    \draw (#1.center) ++(.3333,0) node {\getNth{#2}{;}{6}};
+    \draw (#1.center) ++(-.3333,-.3333) node {\getNth{#2}{;}{7}};
+    \draw (#1.center) ++(0,-.3333) node {\getNth{#2}{;}{8}};
+    \draw (#1.center) ++(.3333,-.3333) node {\getNth{#2}{;}{9}};
+}
+
+\tikzset{basic/.style={draw,fill=blue!20,text badly centered}}
+\tikzset{neurons/.style={basic,circle,fill=blue!10}}
+\tikzset{input/.style={basic,circle}}
+\tikzset{weights/.style={basic,fill=white,rectangle}}
+
+\newcommand{\nndemo}{
+\begin{center}
+\scalebox{0.9}{
+\begin{tikzpicture}[scale=0.4]
+    \node[neurons] (o2) {$y_2$};
+    \node[right of=o2] (u2) {};
+        \path[draw,->] (o2) -- (u2);
+    \node[neurons,above=2em of o2] (o1) {$y_1$};
+    \node[right of=o1] (u1) {};
+        \path[draw,->] (o1) -- (u1);
+    \node[below=2em of o2] (odots) {$\vdots$};
+    \node[neurons,below=2em of odots] (om) {$y_m$};
+    \node[right of=om] (um) {};
+        \path[draw,->] (om) -- (um);
+    
+    \node[left=5em of o2] (b) {};
+    \node[neurons,above=1em of b] (b2) {};
+        \path[draw,->] (b2) -- (o1);
+        \path[draw,->] (b2) -- (o2);
+        \path[draw,->] (b2) -- (om);
+    \node[neurons,above=2em of b2] (b1) {};
+        \path[draw,->] (b1) -- (o1);
+        \path[draw,->] (b1) -- (o2);
+        \path[draw,->] (b1) -- (om);
+    \node[neurons,below=2em of b2] (b3) {};
+        \path[draw,->] (b3) -- (o1);
+        \path[draw,->] (b3) -- (o2);
+        \path[draw,->] (b3) -- (om);
+    \node[below=2em of b3] (bdots) {$\vdots$};
+    \node[neurons,below=2em of bdots] (bk) {};
+        \path[draw,->] (bk) -- (o1);
+        \path[draw,->] (bk) -- (o2);
+        \path[draw,->] (bk) -- (om);
+    
+    \node[left=5em of b] (a) {};
+    \node[neurons,above=1em of a] (a2) {};
+        \path[draw,->] (a2) -- (b1);
+        \path[draw,->] (a2) -- (b2);
+        \path[draw,->] (a2) -- (b3);
+        \path[draw,->] (a2) -- (bk);
+    \node[neurons,above=2em of a2] (a1) {};
+        \path[draw,->] (a1) -- (b1);
+        \path[draw,->] (a1) -- (b2);
+        \path[draw,->] (a1) -- (b3);
+        \path[draw,->] (a1) -- (bk);
+    \node[neurons,below=2em of a2] (a3) {};
+        \path[draw,->] (a3) -- (b1);
+        \path[draw,->] (a3) -- (b2);
+        \path[draw,->] (a3) -- (b3);
+        \path[draw,->] (a3) -- (bk);
+    \node[below=2em of a3] (adots) {$\vdots$};
+    \node[neurons,below=2em of adots] (ak) {};
+        \path[draw,->] (ak) -- (b1);
+        \path[draw,->] (ak) -- (b2);
+        \path[draw,->] (ak) -- (b3);
+        \path[draw,->] (ak) -- (bk);
+        
+    \node[input,left=5em of a] (x2) {$x_2$};
+        \path[draw,->] (x2) -- (a1);
+        \path[draw,->] (x2) -- (a2);
+        \path[draw,->] (x2) -- (a3);
+        \path[draw,->] (x2) -- (ak);
+    \node[input,above=2em of x2] (x1) {$x_1$};
+        \path[draw,->] (x1) -- (a1) ;
+        \path[draw,->] (x1) -- (a2);
+        \path[draw,->] (x1) -- (a3);
+        \path[draw,->] (x1) -- (ak);
+    \node[below=2em of x2] (xdots) {$\vdots$};
+    \node[input,below=2em of xdots] (xn) {$x_n$};
+        \path[draw,->] (xn) -- (a1);
+        \path[draw,->] (xn) -- (a2);
+        \path[draw,->] (xn) -- (a3);
+        \path[draw,->] (xn) -- (ak);
+        
+    \node[left=0.2em of ak] (braceL) {};
+    \node[right=0.2em of bk] (braceR) {};
+    \draw [
+    thick,
+    decoration={
+        brace,
+        mirror,
+        raise=0.7cm
+    },
+    decorate
+    ] (braceL) -- (braceR) node[pos=.5,yshift=-3em] {skryté vrstvy}; 
+    
+    \node[below=2.5em of xn] {vstupní vrstva};
+    
+    \node[below=2.5em of om] {výstupní vrstva};
+    
+\end{tikzpicture}}  % chktex 31
+\end{center}
+}
+
+\title{Neuronové sítě a hluboké učení}
+\author{Jindřich Matuška}
+\institute[FI MU]{Faculty of Informatics, Masaryk University}
+\date{12.\ prosince 2024}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Obsah}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+    \frametitle{Čas na odpovědníky}
+}
+
+\frame{
+    \frametitle{Kdo už viděl \ldots}
+
+    Zvedněte:
+    \begin{itemize}
+        \item 1 ruku, pokud jste danou věc viděli,
+        \item 2 ruce, pokud jste s věcí pracovali
+    \end{itemize}
+    \vspace{1em}
+
+    \pause
+
+    \begin{itemize}
+        \item Perceptron, \pause Neuronová síť, \pause Konvoluční síť \pause
+        \item Vnitřní potenciál $\xi$, \pause Prahová funkce, \pause ReLU, \pause Sigmoida \pause
+        \item Chybová funkce $E$, \pause Kvadratická chyba \pause 
+        \item Derivace, \pause Parciální derivace, \pause Diferenciál
+    \end{itemize}
+}
+
+\begin{frame}
+    \frametitle{Obsah}
+    \tableofcontents
+\end{frame}
+
+\begin{section}{Struktura a výpočet neuronové sítě}
+
+\frame{
+	\nndemo{}
+}
+
+\frame{
+	\frametitle{Perceptron}
+
+	Vnitřní potenciál perceptronu
+	\[\xi_i = -w_{0,i} + \sum_j w_{j,i}\cdot a_j\]
+	Výstup jednotky ($g_i$ je aktivační funkce jednotky $i$)
+	\[a(i) = g_i(\xi_i)\]
+}
+
+\frame{
+	\frametitle{Aktivační funkce}
+
+	Prahová funkce
+	\[f(x) = \begin{cases}
+		1 & x \geq 0\\
+		0 & \text{jinak}
+	\end{cases}\]
+
+	ReLU
+	\[f(x) = \begin{cases}
+		x & x \geq 0\\
+		0 & \text{jinak}
+	\end{cases}\]
+
+	Sigmoida
+	\[\sigma(x) = \frac{1}{1+e^{-x}}\]
+}
+
+\frame{
+	\frametitle{Příklad 11.1.1 a), b)}
+
+Uvažte následující funkce $f$, $g$ a $h$.
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[xmin=-0.5,ymin=-0.2,xmax=1.5,ymax=1.2, samples=20,
+    legend cell align=left,
+    legend pos=north west,
+    width=0.5\textwidth,
+    height=0.4\textwidth
+%    legend style={draw=none}
+    ]
+  \addplot[blue, thick, domain=-0.5:0] {0 };
+  \addplot[blue, thick, domain=0:1] {1 };
+  \addplot[blue, thick, domain=1:1.5] {0 };
+
+  \draw [draw=blue, fill=white, thick] (axis cs: 0, 0) circle (2.0pt);
+  \draw [draw=blue, fill=blue, thick] (axis cs: 0, 1) circle (2.0pt);
+  \draw [draw=blue, fill=blue, thick] (axis cs: 1, 1) circle (2.0pt);
+  \draw [draw=blue, fill=white, thick] (axis cs: 1, 0) circle (2.0pt);
+\end{axis}
+  \node at (1.7, -0.78) {Funkce $f$};
+\end{tikzpicture}
+\hfil\begin{tikzpicture}
+\begin{axis}[xmin=-1.2,ymin=-0.2,xmax=1.2,ymax=1.2, samples=20,
+    legend cell align=left,
+    legend pos=north west,
+    width=0.5\textwidth,
+    height=0.4\textwidth
+%    legend style={draw=none}
+    ]
+  \addplot[blue, thick, domain=-1.2:0] {1+x };
+  \addplot[blue, thick, domain=0:1.2] {1-x };
+\end{axis}
+  \node at (1.7, -0.78) {Funkce $g$};
+\end{tikzpicture}
+\end{center}
+
+Aplikací operací skládání funkcí, násobení konstantou, přičítání konstanty a sčítání
+
+\begin{enumerate}[a)]
+    \item$\bigstar$ a pomocí prahové funkce vyjádřete funkci $f$,
+    \item$\bigstar$ a pomocí ReLU vyjádřete funkci $g$,
+\end{enumerate}
+}
+
+\frame{
+	\frametitle{Příklad 11.1.3}
+
+	\begin{center}
+	\scalebox{0.6}{
+	\begin{tikzpicture}
+
+		\node[neurons] (center) {$y_1$};
+		\node[right of=center] (right) {};
+			\path[draw,->] (center) -- (right);
+		\node[neurons,left=8em of center] (n2) {$n_2$};
+			\path[draw,->] (n2) -- (center) node [weights, pos=.65] {10};
+		\node[neurons,above=4.5em of n2] (n1) {$n_1$};
+			\path[draw,->] (n1) -- (center) node [weights, pos=.7] {10};
+		\node[neurons,below=4.5em of n2] (n3) {$n_3$};
+			\path[draw,->] (n3) -- (center) node [weights, pos=.7] {10};
+			
+		\node[input,left=11em of n2] (2) {$x_2$};
+			\path[draw,->] (2) -- (n1) node [weights, pos=.73, above] {10};
+			\path[draw,->] (2) -- (n2) node [weights, pos=.75] {0};
+			\path[draw,->] (2) -- (n3) node [weights, pos=.73, below] {-10};
+		\node[input,above=3.5em of 2] (1) {$x_1$};
+			\path[draw,->] (1) -- (n1) node [weights, pos=.5] {0};
+			\path[draw,->] (1) -- (n2) node [weights, pos=.85, above] {-10};
+			\path[draw,->] (1) -- (n3) node [weights, pos=.81, right] {10};
+		\node[input,below=3.5em of 2] (3) {$x_3$};
+			\path[draw,->] (3) -- (n1) node [weights, pos=.81, right] {-10};
+			\path[draw,->] (3) -- (n2) node [weights, pos=.85, below] {10};
+			\path[draw,->] (3) -- (n3) node [weights, pos=.5] {0};
+	\end{tikzpicture}}  % chktex 31
+	\end{center}
+
+	Aktivační funkce je sigmoida $\sigma$, prahová váha $5$.
+	\begin{enumerate}[a)]
+		\item Jaké budou výstupy sítě pro vstupy $(0,0,0)$, $(1,0,1)$, $(1,1,1)$, $(-1, 0, 1)$, $(0.5, 0.4, 0.6)$? 
+		\item Napište jednoduchý program, který pro zadaný vstup spočítá výstup sítě.
+		\item Co síť počítá? Nalezněte co nejstručnější slovní charakteristiku.
+		\item Stačila by pro takový výpočet neuronová síť bez skrytých vrstev?
+	\end{enumerate}
+}
+
+\end{section}
+
+\begin{section}{Učení neuronové sítě}
+
+\frame{
+    \frametitle{Učení neuronové sítě}
+
+    \begin{itemize}
+        \item Data:
+            \[D = \{(\vec x_1, \vec y_{exp, 1}, \ldots, (\vec x_p, y_{exp, p}))\}\]  % chktex 35
+        \item Chybová funkce, kvadratická chyba:
+            \[E = E(\vec y, \vec y_{exp}) = {(||\vec y - \vec y_{exp}||)}^2\]  % chktex 35
+        \item Diferenciál a parciální derivace chybové funkce:
+            \[\nabla E = \left(\frac{\partial E}{w_1}, \frac{\partial E}{w_2},\ldots \right)\]
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Online algoritmus pro učení neuronové sítě}
+
+    Tréninkový set $D = \{(\vec{x}_1, \vec{y}_1), \ldots, (\vec{x}_p, \vec{y}_p))\}$\\
+    Počítáme sekvenci vah $\vec{w}^{(0)}, \vec{w}^{(1)}, \vec{w}^{(2)}, \ldots$
+
+    \begin{itemize}
+        \item $\vec{w}^{(0)}$ je inicializován náhodně hodnotami okolo 0,
+        \item $\vec{w}^{(t+1)} = \vec{w}^{(t)} - \alpha \cdot \nabla E(\vec y^{(t)}, \vec y_k)$,
+    \end{itemize}
+
+    kde
+    \begin{itemize}
+        \item $k = (t \mod p) + 1$,
+        \item $0 < \alpha \leq 1$ je konstanta učení,
+        \item $\vec y^{(t)}$ je výsledek vrácený sítí v iteraci $t$ na vstupu $\vec y_k$.
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Online perceptronový algoritmus}
+
+    Tréninkový set $D = \{(\vec{x}_1, c_1), \ldots, (\vec{x}_p, c_p))\}$\\
+    Počítáme sekvenci vah $\vec{w}^{(0)}, \vec{w}^{(1)}, \vec{w}^{(2)}, \ldots$
+    \begin{itemize}
+        \item $\vec w^{(0)}$ je inicializována náhodně s hodnotami okolo 0,
+        \item $\vec w^{(t+1)} = \vec w^{(t)} - \alpha\cdot (C[\vec w^{(t)}](\vec x_k) - c_k) \cdot \tilde x_k$,
+    \end{itemize}
+    kde
+    \begin{itemize}
+        \item $k = (t \mod p) + 1$,
+        \item $0 < \alpha \leq 1$ je konstanta učení.
+    \end{itemize}
+}
+
+\frame{
+    \frametitle{Příklad 11.2.1 (pokud budeme chtít)}
+
+    Viz sbírka
+}
+
+\end{section}
+
+\begin{section}{Zpracování obrazu a klasifikace}
+
+\frame{
+    \frametitle{Zpracování obrazu}
+
+    Úlohy:
+    \begin{itemize}
+        \item klasifikace, odhalení objektů,
+        \item generování obrazu, upscaling, stylizace obrazu
+        \item (de)komprese
+    \end{itemize}
+
+    Velký objem dat
+
+    Časté využití konvolučních vrstev --- hledání rysů v obrazu
+}
+
+\frame{
+    \frametitle{Softmax}
+
+    Transformace výstupu na pravděpodobnosti
+    \[\text{softmax}(x_1, \ldots, x_n) = \left(\frac{e^{x_1}}{\sum_{i=1}^n e^{x_i}}, \frac{e^{x_1}}{\sum_{i=1}^n e^{x_i}},\ldots, \frac{e^{x_n}}{\sum_{i=1}^n e^{x_i}}\right)\]
+}
+
+\end{section}
+\end{document}  % chktex 17

@@ -1,0 +1,5 @@
+Komprese videohovorů (4 roky staré)
+https://developer.nvidia.com/ai-video-compression
+
+Ukázka state of the art
+https://www.youtube.com/watch?v=1BDqfPEhsCA
